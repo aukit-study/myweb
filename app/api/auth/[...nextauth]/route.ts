@@ -12,7 +12,7 @@ const handler = NextAuth({
         email: { label: 'Email', type: 'text' },
         password: { label: 'Password', type: 'password' },
       },
-      async authorize(credentials) {
+      async authorize(credentials: Record<"email" | "password", string>, req: any) {
         if (!credentials) return null
 
         const { email, password } = credentials
