@@ -1,9 +1,12 @@
-import NextAuth, { NextAuthOptions } from 'next-auth'
+// app/api/auth/[...nextauth]/route.ts
+import NextAuth from 'next-auth'
+import type { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import db from '@/lib/db'
 import bcrypt from 'bcryptjs'
+import db from '@/lib/db'
 import { RowDataPacket } from 'mysql2'
 
+// ตัวเลือกการตั้งค่าของ NextAuth
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
@@ -12,26 +15,23 @@ export const authOptions: NextAuthOptions = {
         email: { label: 'Email', type: 'text' },
         password: { label: 'Password', type: 'password' },
       },
-      async authorize(
-        credentials: Record<"email" | "password", string> | undefined,
-        req
-      ) {
-        if (!credentials) return null;
+      async authorize(credentials, req) {
+        if (!credentials) return null
 
-        const { email, password } = credentials;
-        const [rows] = await db.query('SELECT * FROM users WHERE email = ?', [email]) as [RowDataPacket[]];
-        const user = rows[0];
+        const { email, password } = credentials
+        const [rows] = await db.query('SELECT * FROM users WHERE email = ?', [email]) as [RowDataPacket[]]
+        const user = rows[0]
 
-        if (!user) return null;
+        if (!user) return null
 
-        const isValid = await bcrypt.compare(password, user.password);
-        if (!isValid) return null;
+        const isValid = await bcrypt.compare(password, user.password)
+        if (!isValid) return null
 
         return {
           id: user.id,
           name: user.name || user.email,
           email: user.email,
-        };
+        }
       },
     }),
   ],
@@ -44,5 +44,6 @@ export const authOptions: NextAuthOptions = {
   },
 }
 
-const handler = NextAuth(authOptions);
-export { handler as GET, handler as POST };
+const handler = NextAuth(authOptions)
+
+export { handler as GET, handler as POST }
