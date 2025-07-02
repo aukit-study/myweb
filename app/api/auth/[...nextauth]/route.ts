@@ -1,9 +1,10 @@
+// app/api/auth/[...nextauth]/route.ts
 import NextAuth from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import db from '@/lib/db' // หรือเปลี่ยนเป็น path ถูกต้อง
+import db from '@/lib/db'
 import bcrypt from 'bcryptjs'
 
-export const authOptions = {
+const handler = NextAuth({
   providers: [
     CredentialsProvider({
       name: 'Credentials',
@@ -37,9 +38,6 @@ export const authOptions = {
   pages: {
     signIn: '/login',
   },
-}
+})
 
-const handler = NextAuth(authOptions)
 export { handler as GET, handler as POST }
-
-
