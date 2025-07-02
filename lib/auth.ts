@@ -15,15 +15,12 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials) return null
-
         const { email, password } = credentials
         const [rows] = await db.query('SELECT * FROM users WHERE email = ?', [email]) as [RowDataPacket[]]
         const user = rows[0]
         if (!user) return null
-
         const isValid = await bcrypt.compare(password, user.password)
         if (!isValid) return null
-
         return {
           id: user.id,
           name: user.name || user.email,
