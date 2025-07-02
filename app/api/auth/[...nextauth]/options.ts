@@ -16,9 +16,9 @@ export const authOptions: NextAuthOptions = {
         if (!credentials) return null;
         const { email, password } = credentials;
         const [rows] = (await db.query(
-          "SELECT * FROM users WHERE email = ?",
-          [email]
-        )) as unknown as [RowDataPacket[]];
+        'SELECT * FROM users WHERE email = ?',
+        [email]
+        )) as unknown as [RowDataPacket[], any];
         const user = rows[0];
         if (!user) return null;
         const isValid = await bcrypt.compare(password, user.password);
