@@ -1,10 +1,10 @@
-// app/api/auth/[...nextauth]/route.ts
-import NextAuth from 'next-auth'
+import NextAuth, { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import db from '@/lib/db'
 import bcrypt from 'bcryptjs'
+import { RowDataPacket } from 'mysql2'
 
-const handler = NextAuth({
+export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: 'Credentials',
@@ -12,22 +12,26 @@ const handler = NextAuth({
         email: { label: 'Email', type: 'text' },
         password: { label: 'Password', type: 'password' },
       },
-      async authorize(credentials: Record<"email" | "password", string>, req: any) {
-        if (!credentials) return null
+      async authorize(
+        credentials: Record<"email" | "password", string> | undefined,
+        req
+      ) {
+        if (!credentials) return null;
 
-        const { email, password } = credentials
-        const [rows] = await db.query('SELECT * FROM users WHERE email = ?', [email])
-        const user = Array.isArray(rows) && rows.length > 0 ? rows[0] as { id: number, name?: string, email: string, password: string } : null
-        if (!user) return null
+        const { email, password } = credentials;
+        const [rows] = await db.query('SELECT * FROM users WHERE email = ?', [email]) as [RowDataPacket[]];
+        const user = rows[0];
 
-        const isValid = await bcrypt.compare(password, user.password)
-        if (!isValid) return null
+        if (!user) return null;
+
+        const isValid = await bcrypt.compare(password, user.password);
+        if (!isValid) return null;
 
         return {
           id: user.id,
           name: user.name || user.email,
           email: user.email,
-        }
+        };
       },
     }),
   ],
@@ -38,6 +42,7 @@ const handler = NextAuth({
   pages: {
     signIn: '/login',
   },
-})
+}
 
-export { handler as GET, handler as POST }
+const handler = NextAuth(authOptions);
+export { handler as GET, handler as POST };
