@@ -17,7 +17,7 @@ const handler = NextAuth({
 
         const { email, password } = credentials
         const [rows] = await db.query('SELECT * FROM users WHERE email = ?', [email])
-        const user = Array.isArray(rows) && rows.length > 0 ? rows[0] : null
+        const user = Array.isArray(rows) && rows.length > 0 ? rows[0] as { id: number, name?: string, email: string, password: string } : null
         if (!user) return null
 
         const isValid = await bcrypt.compare(password, user.password)
